@@ -1,0 +1,140 @@
+---
+title: "Stats 290 Project Report"
+author: "Priyanka Dutta & Mamta Sinha"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Stats 290 Project Report}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(collapse = T, comment = "#>")
+library(statgeophy)
+```
+
+## Introduction
+The "statgeophy" package aims to introduce statistical learning tools for global sensitivity analysis of complicated anaytical models describing physical phenomena. 
+
+A common problem in geosciences is that we have theoretical models that call for several inputs, but given practical budget constraints we can reliably measure only a few of those required inputs.Therefore understanding which of the multiple input measurements (within ranges practical for geoscience applications) have the most impact on the output from the theoretical model is important to us.
+
+For a given physical model, the results of the analysis and visualization done with the package should help us answers questions like:  
+1. Which of the uncertain inputs factors in the model are so non-influential that we can safely fix their values?  
+2. If we could eliminate the uncertainity of one of the input factors, which factor should we choose to reduce the most variance in the output?
+
+## Package description/Workflow
+  __1. Data generation/reading, visualization using the geophysical models.__
+
+```{r, eval = FALSE}
+#Default uses datalength = 1000 input points and model = shearRange
+df <- generateData()
+
+#Different arguments of generateData function
+df <- generateData(datalength = 1000, modelfn = shearRange, userdata = NULL,
+                         v_mean = list(36, 36, 1, 1, 0.3), 
+                         v_sd = list(10, 10, 0.4, 0.4, 0.2), visualize = FALSE )
+
+#For generating a compositeShear model output
+df <- generateData(modelfn = compositeShear, v_mean = list(36, 45, 36, 45, 1, 0.4, 0.25), 
+    v_sd = list(10, 10, 10, 10, 0.5, 0.1, 0.1))
+
+#User-defined models can be passed to this function too e.g if the function is myModel and
+#user wants to generate data. User knows the number of inputs is needed by his function. If he
+#wants to generate the inputs, he will pass the appropriate lengths of v_mean and v_sd (making sure
+#length(v_mean) = length(v_sd)). e.g the number of inputs is 3
+
+df <- generateData(modelfn = myModel, v_mean = list(10, 20, 0.5), v_sd = list(2, 4, 0.2))
+
+#Alternatively user can pass a userdata dataframe with columns which are inputs. He can again
+#chose default shearRange or chose compositeShear or his own model to create an output
+v_mean = list(36, 36, 1, 1, 0.3)
+v_sd = list(10, 10, 0.4, 0.4, 0.2)
+myDataFrame <- mapply(rnorm, 2000, v_mean, v_sd)
+df <- generateData(userdata = myDataFrame) #For shearRange (make sure the number of inputs = 5)
+df <- generateData(modelfn = compositeShear, userdata = myDataFrame) #For compositeShear
+df <- generateData(modelFn = myModel, userdata = myDataFrame) # For user model
+########
+#DO NOT use quotes around the function names. "shearRange" is wrong. Use shearRange/compositeShear/myModel.
+########
+
+#To visualize the data after the modelling (since some filters are applied during the modelling and
+#some of the original inputs values are dropped), if visualize=TRUE, the inputs will be plotted against
+#each other using pairs function
+
+df <- generateData(visualize=TRUE)
+
+```
+
+
+__2. Model-fitting and input importance analysis.__
+
+```{r, eval = FALSE}
+#The dataframe produced can be input into modelFitting to do different model fits
+#The default used is linear regression. To plot the predictor importance
+#set plotPredImp = TRUE
+m <- modelFitting(df, modelFit = "lm", plotPredImp = FALSE)
+
+#Values of modelFit = "lm", "rf", "gb" and "all"
+#modelFit = "all" computes all three model fits
+m <- modelFitting(df, modelFit = "all", plotPredImp = FALSE)
+```
+
+```{r}
+#Plotting
+df <- suppressMessages(generateData())
+m <- modelFitting(df, modelFit = "all", plotPredImp = TRUE)
+```
+  
+    
+__3. Result visualization.__
+
+```{r, eval = FALSE}
+#Result visualization examples are shiny apps.
+
+#Inputs: Data length, sliders to change the mean and sd for the rnorm
+#generation of the data.
+
+#Output: It has 3 tabs: Predictor Importance,
+#Test vs Predicted values, summary of the 3 fits.
+
+#For shearRange modelling results for all 3 fits use
+statgeophy::shinyShearRange()
+
+#For compositeShear
+statgeophy::shinyCompositeShear()
+```
+
+
+## Example 1: Analysis of Voigt-Reuss shear modulus range
+Estimating the effective elastic behavior of a composite with micro-scale anisotropy is an important problem in rock physics.For the case of isotropic orientation of anisotropic micro-domains, the composite bulk $(K)$ and shear $(G)$ moduli obtained by Voigt and Reuss averaging can be neatly summarized in terms of the components of the individual domain stiffness/compliance tensor components(Sumino and Anderson, 1984). These are given by the following equations, where $C_{ij}$   and $S_{ij}$ are the components of the stiffness and compliance tensors, respectively (in Voigt notation).
+$$K_{v} = (\frac{1}{9})((C_{11}+C_{22}+C_{33})+2(C_{12}+C_{23}+C_{31}));  \frac{1}{K_{r}} = ((S_{11}+S_{22}+S_{33})+2(S_{12}+S_{23}+S_{31}))$$
+$$G_{v} = (\frac{1}{15})((C_{11}+C_{22}+C_{33})-(C_{12}+C_{23}+C_{31})+3(C_{44}+C_{55}+C_{66}))$$  
+$$\frac{1}{G_{r}} = (\frac{1}{15})(4(S_{11}+S_{22}+S_{33})-4(S_{12}+S_{23}+S_{31})+3(S_{44}+S_{55}+S_{66}))$$
+$K_v$ and $K_r$ represent the Voigt (upper, iso-strain) and Reuss (lower, iso-stress) bounds for the bulk modulus of the isotropic macro-composite. Similarly, $G_v$ and $G_r$ represent the Voigt and Reuss bounds for the shear modulus of the macro-composite.The difference between the Voigt and Reuss estimates represent the uncertainty due to the unknown micro-geometry of the composite.
+
+In this package, we examine the influence of anisotropic micro-domain inputs ($C_{33}$, $C_{44}$, $\epsilon$, $\gamma$, $\delta$) on the normalised shear modulus range $( = (G_v - G_r)/G_v)$ using statistical learning tools. As may be seen from the figure in the 'Model-fitting and input importance analysis' section, for the chosen range-value of inputs, micro-domain Thomsen parameter $\gamma$ seems to dominate the normalised shear range response. Even though the goodness of fit and the importance-criterion are slightly differnt between each model, all three methods (linear regression, random forest, boosted trees) associate $\gamma$ with the greatest variable importance. For linear fits, 't-statistic' is used as a measure of importance. Ofcourse 't-statistic alone is not enough, we also need to look at the overall test MSE and the p-values to draw useful conclusions about our model. For this reason, the Shiny app in the package (corresponding to function shearRange), has three tabs, first showing a variable importance bar chart,  the second showing predicted vs. true test responses along with the test RMSE, and the third displaying a summary of the fit. This is true of random forest and gradient boosting results as well.
+
+Note: Model inputs $\epsilon$, $\gamma$, $\delta$ are Thomsen parameters, very commonly used in geophysics to quantify anisotropy in a VTI (vertical transverse isotropy) medium. The are related to the medium's stiffness tensor components as follows:
+
+$$\epsilon = \frac{C_{11} - C_{33}}{2C_{33}};\gamma = \frac{C_{66} - C_{44}}{2C_{44}}; \delta = \frac{(C_{13} + C_{44})^2 - (C_{33} - C_{44})^2}{2C_{33}(C_{33} - C_{44})}$$
+
+## Example 2: Analysis of differential effective medium model
+The differntial effective medium theory models two phase composites by incrementally adding inclusions of one phase to the matrix phase. The matrix begins at phase 1 (concemtration of phase 2 = 0) and is changed at each step as a new increment of phase 2 is added) The process iterativelt repeated until the desired proportion of the two phases is attained.Th e coupled system of ordinary differntial equations for effective bulk and shear moduli $K^*$ and $\mu^*$, repectively, are:
+$$(1-y)\frac{d}{dy}[K^*(y)] = (K_{2} - K^*)P^{(*2)}(y)$$
+$$(1-y)\frac{d}{dy}[\mu^*(y)] = (\mu_{2} - \mu^*)Q^{(*2)}(y)$$
+with initial conditions $K^*(0) = K_{1}$ and $\mu^*(0) = \mu_{1}$, where $K_{1}$ and $\mu_{1}$ are the bulk and shear moduli of the intitial/host material (Phase 1). $K_{2}$ and $\mu_{2}$ are the bulk and shear moduli of the inclusion material (Phase 2). $y$ is the volume proportion of the inclusion material. $P$ and $Q$ are geometric factors related to the inclusion shape (aspect ratio:$asp$) and distribution (volume fraction: $phi$ & critical volume fraction $phic$).
+
+In this package, we examine the influence of various properties of the phases in a two phase composite ($K_1$,$\mu_1$,$K_2$,$\mu_2,asp,phic,phi$) on the composite shear modulus ($\mu$) using statistical learning tools. As may be seen from the figures below, for the chosen range-value of inputs, the absolute value of the contast between the shear moduli of the 2 phases comprising the composite dominate its shear modulus. This result is not as intuitive as it apparently sounds. As with example 1, even though the goodness of fit and the importance-criterion are slightly differnt between each model, all three methods associate the same variables with the greatest importance. 
+  
+![](all4.PNG)
+
+## Way forward
+Comparison of importance measures from statistical learning methods with Sobol indices. Better tuning of GBM model, using the 'caret' package.
+
+## References
+1. Mavko, G., T. Mukerji, & J. Dvorkin, 2009, The rock physics handbook: Tools for seismic analysis of porous media: Cambridge University Press, 2009.  
+2. Berryman, J. G, s. R., Pride, & H. F. Wang, 1992, A differential scheme for elastic properties of rocks with dry or saturated cracks: In Proc. 15th ASCE Engineering Mechanics Conference.  
+3. Sumino, Y., and O.L. Anderson, 1984, Elastic constants of minerals, in R.S. Carmichael, ed. Handbook of Physical Properties of Rocks: CRC Press, Inc., 39-138.  
+4. Thomsen, L., 1986, Weak elastic anisotropy: Geophysics, 51(10), 1954-1966.  
+

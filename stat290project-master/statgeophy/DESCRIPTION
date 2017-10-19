@@ -1,0 +1,31 @@
+Package: statgeophy
+Title: Statistical Interpretation with Geophysical Modeling
+Version: 1.0
+Authors@R: c(
+	person("Priyanka", "Dutta", email = "pdutta03@stanford.edu", role = c("aut", "cre")),
+	person("Mamta", "Sinha", email = "msinha@stanford.edu", role = "aut")
+	)
+Description: This package uses 3 statistical methods to do predictor importance analysis.
+Depends: R (>= 3.3.2)
+Imports:
+	stats,
+	deSolve,
+	randomForest,
+	gbm,
+	ggplot2,
+	magrittr,
+	gridExtra,
+	shiny
+License: GPL (>= 2)
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.0.1
+NeedsCompilation: no
+Packaged: 2017-03-08 05:26:56 UTC; msinha
+Author: Priyanka Dutta [aut, cre],
+  Mamta Sinha [aut]
+Maintainer: Priyanka Dutta <pdutta03@stanford.edu>
+Suggests: knitr,
+    rmarkdown,
+    testthat
+VignetteBuilder: knitr

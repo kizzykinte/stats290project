@@ -1,0 +1,105 @@
+---
+title: "Project Proposal"
+output:
+     html_document
+---
+
+__Proposal Deadline: Jan 30, 2017 11:59pm__
+
+
+- Edit this markdown file by __replacing only__ what is there in the
+chunks named `q0`, `q1`, `q2`, ..., `q5` with your team's appropriate
+answers. These chunks have been filled in as an example.
+
+- Place the filled in markdown in any one of the team member's private
+directory with the same name `proposal.Rmd`. Do not change the name!
+
+
+0. Who are the authors of this package? See format below.
+
+```{r q0}
+authors <- list(sunet1 = "Mamta Sinha",
+                sunet2 = "Priyanka Dutta")
+```
+
+1. What is your package trying to achieve?  Who is it aimed at?
+
+```q1
+
+1. Analysis: For a given set of synthetic inputs (sampled as per a distribution reasonable for earth properties) and corresponding outputs (from a theoretical model) from the user, this package will fit the data with the statistical learning methods mentioned above. It will pick out the best fit model (minimum test error) and based on this model, rank the inputs/predictors in order of importance/impact. 
+
+2. Visualization: The package will also help the user visualize the results of the analysis in a few forms, such as relative importance bar plots etc.
+
+While the prototype package is being developed with specific geophysical models in mind, in its more general form, the package will be useful not only to geoscientists but to anyone wishing to understand the relative impact of variables going into a complicated theoretical model, very commonly encountered in physical and natural sciences.
+
+```
+
+2. Briefly describe the background if that's not obvious.  What field
+   or area of interest is it related to?  (Just briefly, in a paragraph
+   or two, maximum.) References, including web references, are welcome
+   where available.
+
+```q2
+
+A common problem in geosciences is that we have theoretical models that call for several inputs, but given practical budget constraints we can reliably measure only a few of those required inputs.Therefore understanding which of the multiple input measurements (within ranges practical for geoscience applications) have the most impact on the output from the theoretical model is important to us. 
+
+Theoretical models in geosciences are often iterative and/or in the form of differential equations, making it difficult to understand the exact nature of relationship between the inputs and the output. This also makes it harder to apply some of the standard tools for sensitivity analysis.The goal of this project is to use statistical learning methods for computing importance of variables in these theoretical models. 
+
+The most general form of this problem is very wide in scope, and for the purpose of this project we will narrow it down as follows:
+1) We will run our analysis on a couple of geophysical models.
+2) Both these models deal with only numerical inputs and outputs.
+3) We will test two statistical methods for predictor importance analysis: linear regression and trees.
+
+```
+
+3. Provide one or two use cases; that is, in a sentence or so say how
+   you see someone using the package.
+
+```q3
+
+While the prototype package is being developed with specific geophysical models in mind, in its more general form, the package will be useful not only to geoscientists but to anyone wishing to understand the relative impact of variables going into a complicated theoretical model, very commonly encountered in physical and natural sciences.
+
+```
+
+4. If you can, list the main functions or other software you plan on
+   including.  No need to implement anything now, but you should have
+   an idea.
+
+```q4
+
+The R package will provide the following functions: reading and
+writing data, running statistical learning methods, cross-validation, creating graphs and visualizations, etc. 
+```
+
+```{r, echo = FALSE, hide = TRUE}
+none <- "none"
+basic <- "basic"
+proficient <- "proficient"
+```
+
+5. For languages C/C++, Java, Python, Ruby, please specify your
+   proficiency: Proficient, basic knowledge, no knowledge.  (This
+   helps us evaluate the proposal sometimes and offer suggestions.)
+
+```{r q5}
+languages <- list(
+    ## replace the values below appropriately for each member
+    sunet1 = c(cxx = none,
+               java = proficient,
+               python = proficient,
+               ruby = none)
+    ,
+    sunet2 = c(cxx = basic,
+               java = none,
+               python = none,
+               ruby = none)
+)
+```
+
+
+
+
+
+
+
+
